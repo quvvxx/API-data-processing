@@ -11,3 +11,14 @@
 | 응답 형식 | JSON |
 | 주요 요청값 | `base_date`, `base_time`, `nx`, `ny` |
 | 주요 응답값 | 기온(T1H), 습도(REH), 강수량(RN1), 강수형태(PTY), 풍속(WSD), 풍향(VEC) |
+
+<br>
+
+### 데이터베이스 구조
+
+- Region: API 호출에 필요한 행정구역 및 격자 좌표 저장
+- WeatherObservation: 지역별 관측 시각/카테고리/관측값 저장
+
+<p align="center">
+  <img src="./docs/erd.png" width="700"/>
+</p>
