@@ -2,6 +2,7 @@ package com.quvvxx.weather.domain.region.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -29,4 +30,25 @@ public class Region {
 
     @Column(nullable = false)
     private int ny;
+
+    @Builder
+    private Region(String regionCode, String sido, String sigungu, String eupmyeondong, int nx, int ny){
+        this.regionCode = regionCode;
+        this.sido = sido;
+        this.sigungu = sigungu;
+        this.eupmyeondong = eupmyeondong;
+        this.nx = nx;
+        this.ny = ny;
+    }
+
+    public static Region of(String regionCode, String sido, String sigungu, String eupmyeondong, int nx, int ny){
+        return Region.builder()
+                .regionCode(regionCode)
+                .sido(sido)
+                .sigungu(sigungu)
+                .eupmyeondong(eupmyeondong)
+                .nx(nx)
+                .ny(ny)
+                .build();
+    }
 }
