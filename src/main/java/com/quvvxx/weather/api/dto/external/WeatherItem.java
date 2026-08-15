@@ -1,4 +1,4 @@
-package com.quvvxx.weather.api.dto;
+package com.quvvxx.weather.api.dto.external;
 
 public record WeatherItem(
         String baseDate,

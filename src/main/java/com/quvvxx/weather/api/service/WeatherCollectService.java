@@ -1,8 +1,8 @@
 package com.quvvxx.weather.api.service;
 
 import com.quvvxx.weather.api.client.WeatherApiClient;
-import com.quvvxx.weather.api.dto.WeatherApiResponse;
-import com.quvvxx.weather.api.dto.WeatherItem;
+import com.quvvxx.weather.api.dto.external.WeatherApiResponse;
+import com.quvvxx.weather.api.dto.external.WeatherItem;
 import com.quvvxx.weather.domain.region.domain.Region;
 import com.quvvxx.weather.domain.region.domain.RegionRepository;
 import com.quvvxx.weather.domain.weather.domain.WeatherObservation;

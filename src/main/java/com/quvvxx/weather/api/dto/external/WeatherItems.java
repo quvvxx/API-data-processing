@@ -1,4 +1,4 @@
-package com.quvvxx.weather.api.dto;
+package com.quvvxx.weather.api.dto.external;
 
 import java.util.List;
 
