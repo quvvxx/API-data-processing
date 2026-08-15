@@ -3,6 +3,7 @@ package com.quvvxx.weather.domain.weather.domain;
 import com.quvvxx.weather.domain.region.domain.Region;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
@@ -31,5 +32,26 @@ public class WeatherObservation {
     @Column(name = "obsr_value", length = 20, nullable = false)
     private String obsrValue;
 
+    @Builder
+    private WeatherObservation(
+            Region region, LocalDateTime observedAt,
+            String category, String obsrValue){
+        this.region = region;
+        this.observedAt = observedAt;
+        this.category = category;
+        this.obsrValue = obsrValue;
+    }
+
+    public static WeatherObservation of(
+            Region region, LocalDateTime observedAt,
+            String category, String obsrValue) {
+
+        return WeatherObservation.builder()
+                .region(region)
+                .observedAt(observedAt)
+                .category(category)
+                .obsrValue(obsrValue)
+                .build();
+    }
 
 }
