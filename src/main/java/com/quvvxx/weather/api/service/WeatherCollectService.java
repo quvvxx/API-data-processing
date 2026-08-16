@@ -27,10 +27,10 @@ public class WeatherCollectService {
     public void collect(){
 
         List<Region> regions =
-                regionRepository.findTop15OByOrderByIdAsc();
+                regionRepository.findTop150ByOrderByIdAsc();
+        List<WeatherObservation> observations = new ArrayList<>();
 
         for(Region region : regions){
-            List<WeatherObservation> observations = new ArrayList<>();
 
             WeatherApiResponse response =
                     weatherApiClient.getWeather(region.getNx(), region.getNy());
@@ -52,8 +52,8 @@ public class WeatherCollectService {
 
                 observations.add(observation);
             }
-            weatherObservationRepository.saveAll(observations);
         }
 
+        weatherObservationRepository.saveAll(observations);
     }
 }
