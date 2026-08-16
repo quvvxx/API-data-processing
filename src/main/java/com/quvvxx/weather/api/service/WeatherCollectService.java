@@ -8,6 +8,7 @@ import com.quvvxx.weather.domain.region.domain.RegionRepository;
 import com.quvvxx.weather.domain.weather.domain.WeatherObservation;
 import com.quvvxx.weather.domain.weather.domain.WeatherObservationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -27,12 +29,10 @@ public class WeatherCollectService {
     public void collect(){
 
         List<Region> regions =
-                regionRepository.findTop15OByOrderByIdAsc();
-
-        System.out.println("수집 대상 지역 수 = " + regions.size());
+                regionRepository.findTop150ByOrderByIdAsc();
+        List<WeatherObservation> observations = new ArrayList<>();
 
         for(Region region : regions){
-            List<WeatherObservation> observations = new ArrayList<>();
 
             WeatherApiResponse response =
                     weatherApiClient.getWeather(region.getNx(), region.getNy());
@@ -54,10 +54,14 @@ public class WeatherCollectService {
 
                 observations.add(observation);
             }
-
-            System.out.println("최종 저장 대상 데이터 수 = " + observations.size());
-            weatherObservationRepository.saveAll(observations);
         }
+        log.info("수집 대상 데이터 수: {}", observations.size());
+        long start = System.nanoTime();
 
+        weatherObservationRepository.saveAll(observations);
+        weatherObservationRepository.flush();
+
+        long end = System.nanoTime();
+        log.info("DB 저장 소요 시간: {} ms", (end - start) / 1_000_000);
     }
 }
