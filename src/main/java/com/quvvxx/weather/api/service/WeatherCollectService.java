@@ -28,14 +28,27 @@ public class WeatherCollectService {
 
     public void collect(){
 
+        long collectStart = System.nanoTime();
+        long regionStart = System.nanoTime();
+
         List<Region> regions =
                 regionRepository.findTop150ByOrderByIdAsc();
+
+        long regionEnd = System.nanoTime();
         List<WeatherObservation> observations = new ArrayList<>();
+
+        long apiTotalTime = 0;
+        long existsTotalTime = 0;
 
         for(Region region : regions){
 
+            long apiStart = System.nanoTime();
+
             WeatherApiResponse response =
                     weatherApiClient.getWeather(region.getNx(), region.getNy());
+
+            long apiEnd = System.nanoTime();
+            apiTotalTime += apiEnd - apiStart;
 
             List<WeatherItem> items = response.response().body().items().item();
             WeatherItem weatherItem = items.get(0);
@@ -45,8 +58,15 @@ public class WeatherCollectService {
                     DateTimeFormatter.ofPattern("yyyyMMddHHmm")
             );
 
-            if (weatherObservationRepository.existsByRegionAndObservedAt(region, observedAt))
-                continue;
+            long existStart = System.nanoTime();
+
+            boolean exists = weatherObservationRepository
+                    .existsByRegionAndObservedAt(region, observedAt);
+
+            long existEnd = System.nanoTime();
+            existsTotalTime += existEnd - existStart;
+
+            if (exists) continue;
 
             for(WeatherItem item : items){
                 WeatherObservation observation =
@@ -56,12 +76,29 @@ public class WeatherCollectService {
             }
         }
         log.info("수집 대상 데이터 수: {}", observations.size());
-        long start = System.nanoTime();
+        long dbStart = System.nanoTime();
 
         weatherObservationRepository.saveAll(observations);
         weatherObservationRepository.flush();
 
-        long end = System.nanoTime();
-        log.info("DB 저장 소요 시간: {} ms", (end - start) / 1_000_000);
+        long dbEnd = System.nanoTime();
+
+        long collectEnd = System.nanoTime();
+
+        log.info("Region 조회 시간: {} ms",
+                (regionEnd - regionStart) / 1_000_000);
+
+        log.info("외부 API 호출 총 시간: {} ms",
+                apiTotalTime / 1_000_000);
+
+        log.info("중복 확인 총 시간: {} ms",
+                existsTotalTime / 1_000_000);
+
+        log.info("DB 저장 소요 시간: {} ms",
+                (dbEnd - dbStart) / 1_000_000);
+
+        log.info("전체 수집 소요 시간: {} ms",
+                (collectEnd - collectStart) / 1_000_000);
     }
+
 }
