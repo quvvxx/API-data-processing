@@ -13,7 +13,7 @@ public class WeatherScheduler {
 
     private final WeatherCollectService weatherCollectService;
 
-    @Scheduled(cron = "0 10 * * * *")
+    @Scheduled(cron = "0 33 * * * *")
     public void collect(){
         log.info("날씨 수집 시작");
         weatherCollectService.collect();

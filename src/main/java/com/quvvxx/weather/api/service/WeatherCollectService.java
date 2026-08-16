@@ -29,6 +29,8 @@ public class WeatherCollectService {
         List<Region> regions =
                 regionRepository.findTop15OByOrderByIdAsc();
 
+        System.out.println("수집 대상 지역 수 = " + regions.size());
+
         for(Region region : regions){
             List<WeatherObservation> observations = new ArrayList<>();
 
@@ -52,6 +54,8 @@ public class WeatherCollectService {
 
                 observations.add(observation);
             }
+
+            System.out.println("최종 저장 대상 데이터 수 = " + observations.size());
             weatherObservationRepository.saveAll(observations);
         }
 
