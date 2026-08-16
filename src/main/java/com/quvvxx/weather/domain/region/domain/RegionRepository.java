@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface RegionRepository extends JpaRepository<Region, Long> {
 
-    List<Region> findTop15OByOrderByIdAsc();
+    List<Region> findTop150ByOrderByIdAsc();
 }
