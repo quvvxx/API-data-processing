@@ -22,15 +22,7 @@ public class WeatherApiClient {
         this.apiKey = apiKey;
     }
 
-    public WeatherApiResponse getWeather(int nx, int ny){
-
-        String baseDate = LocalDate.now()
-                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-
-        String baseTime = LocalTime.now()
-                .withMinute(0)
-                .withSecond(0)
-                .format(DateTimeFormatter.ofPattern("hhmm"));
+    public WeatherApiResponse getWeather(int nx, int ny, String baseDate, String baseTime){
 
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder

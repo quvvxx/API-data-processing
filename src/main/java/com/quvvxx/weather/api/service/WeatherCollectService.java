@@ -1,6 +1,5 @@
 package com.quvvxx.weather.api.service;
 
-import com.quvvxx.weather.api.client.WeatherApiClient;
 import com.quvvxx.weather.api.dto.external.WeatherApiResponse;
 import com.quvvxx.weather.api.dto.external.WeatherItem;
 import com.quvvxx.weather.domain.region.domain.Region;
@@ -14,34 +13,47 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class WeatherCollectService {
 
-    private final WeatherApiClient weatherApiClient;
+    private final WeatherAsyncService weatherAsyncService;
     private final RegionRepository regionRepository;
     private final WeatherObservationRepository weatherObservationRepository;
 
     public void collect(){
 
-        List<Region> regions =
-                regionRepository.findTop150ByOrderByIdAsc();
+        List<Region> regions = regionRepository.findTop150ByOrderByIdAsc();
+        List<CompletableFuture<WeatherApiResponse>> futures = new ArrayList<>();
         List<WeatherObservation> observations = new ArrayList<>();
 
-        for(Region region : regions){
+        LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
 
-            WeatherApiResponse response =
-                    weatherApiClient.getWeather(region.getNx(), region.getNy());
+        String baseDate = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String baseTime = now.format(DateTimeFormatter.ofPattern("HHmm"));
+
+        LocalDateTime observedAt = LocalDateTime.parse(
+                baseDate + baseTime,
+                DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+
+        for(Region region : regions) {
+
+            CompletableFuture<WeatherApiResponse> future =
+                    weatherAsyncService.getWeather(
+                            region.getNx(), region.getNy(),
+                            baseDate, baseTime);
+
+            futures.add(future);
+        }
+
+        for (int i=0; i<futures.size(); i++){
+            Region region = regions.get(i);
+            WeatherApiResponse response = futures.get(i).join();
 
             List<WeatherItem> items = response.response().body().items().item();
-            WeatherItem weatherItem = items.get(0);
-
-            LocalDateTime observedAt = LocalDateTime.parse(
-                    weatherItem.baseDate() + weatherItem.baseTime(),
-                    DateTimeFormatter.ofPattern("yyyyMMddHHmm")
-            );
 
             if (weatherObservationRepository.existsByRegionAndObservedAt(region, observedAt))
                 continue;
@@ -53,7 +65,7 @@ public class WeatherCollectService {
                 observations.add(observation);
             }
         }
-
         weatherObservationRepository.saveAll(observations);
     }
+
 }
